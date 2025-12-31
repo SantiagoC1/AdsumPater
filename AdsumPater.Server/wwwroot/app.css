@@ -1,0 +1,129 @@
+:root{
+  --azul:#c2e2ff;
+  --amarillo:#f7a343;
+  --marron:#281b13;
+  --rojo:#b01b18;
+  --blanco:#faf6f5;
+
+  --radius:18px;
+  --shadow: 0 12px 30px rgba(0,0,0,.08);
+}
+
+/* Reset mínimo + base */
+*{ box-sizing: border-box; }
+
+html, body{
+  margin: 0;
+  padding: 0;
+  background: var(--blanco);
+  color: var(--marron);
+}
+
+a{ color: inherit; text-decoration: none; }
+a:hover{ text-decoration: none; }
+
+img{
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.container-xl{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Tipografía base (Bootstrap ya trae, pero esto ayuda) */
+h1,h2,h3{
+  margin: 0 0 10px;
+  letter-spacing: .2px;
+}
+
+/* Utilidades */
+.muted{ opacity: .75; }
+
+/* Botones globales reutilizables */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 14px;
+  border: 1px solid rgba(40,27,19,.14);
+  background: white;
+  cursor: pointer;
+  transition: transform .12s ease, filter .12s ease, background .12s ease;
+}
+
+.btn:hover{ filter: brightness(.98); transform: translateY(-1px); }
+
+.btn.primary{
+  background: var(--amarillo);
+  border-color: rgba(40,27,19,.12);
+  color: var(--marron);
+}
+
+.btn.ghost{
+  background: transparent;
+}
+.page-hero{
+  padding: 80px 16px 40px;
+  background: var(--azul-fondo);
+}
+
+.page-hero h1{
+  font-size: 42px;
+  margin-bottom: 12px;
+}
+
+.section{
+  padding: 64px 16px;
+}
+
+.section.alt{
+  background: #fff;
+}
+
+.section-grid{
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+
+.section-img{
+  width: 100%;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.cards{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.card{
+  background: var(--blanco);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card strong{
+  display: block;
+  margin-bottom: 6px;
+}
+
+@media (max-width: 900px){
+  .section-grid{
+    grid-template-columns: 1fr;
+  }
+
+  .page-hero h1{
+    font-size: 34px;
+  }
+}

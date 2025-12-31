@@ -1,0 +1,75 @@
+﻿@inherits LayoutComponentBase
+
+<div class="site">
+    <header class="topbar">
+        <div class="container-xl topbar-inner">
+            <a class="brand" href="/">
+                <img src="img/LogoAdsum-Claro.png" alt="Adsum Pater" />
+                <div class="brand-text">
+                    <div class="brand-title">Adsum Pater</div>
+                    <div class="brand-sub">Misión universitaria · Schoenstatt</div>
+                </div>
+            </a>
+
+            <nav class="nav">
+                <a href="/que-es">¿Qué es?</a>
+                <a href="/equipo">Equipo</a>
+                <a href="/pueblo">El pueblo</a>
+                <a href="/historia">Historia</a>
+                <a href="/galeria">Galería</a>
+                <a href="/testimonios">Testimonios</a>
+                <a href="/foro">Foro</a>
+                <a class="cta" href="/sumate">Sumate</a>
+                <a href="/contacto">Contacto</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        @Body
+    </main>
+
+    <footer class="footer2">
+  <div class="container-xl footer2-inner">
+    <div class="footer2-brand">
+      <img src="img/LogoAdsum-Claro.png" alt="Adsum Pater" />
+      <div>
+        <div class="footer2-title">Adsum Pater</div>
+        <div class="footer2-sub">Misión universitaria · Schoenstatt</div>
+      </div>
+    </div>
+
+    <div class="footer2-cols">
+      <div class="footer2-col">
+        <div class="footer2-coltitle">Explorar</div>
+        <a href="/que-es">¿Qué es?</a>
+        <a href="/equipo">Equipo</a>
+        <a href="/historia">Historia</a>
+        <a href="/galeria">Galería</a>
+      </div>
+
+      <div class="footer2-col">
+        <div class="footer2-coltitle">Participar</div>
+        <a href="/foro">Foro</a>
+        <a href="/sumate">Sumate</a>
+        <a href="/testimonios">Testimonios</a>
+        <a href="/contacto">Contacto</a>
+      </div>
+
+      <div class="footer2-col">
+        <div class="footer2-coltitle">Redes</div>
+        <a href="https://www.instagram.com/adsumpater/" target="_blank" rel="noopener">Instagram</a>
+        <a href="mailto:contacto@adsumpater.org">contacto@adsumpater.org</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer2-bottom">
+    <div class="container-xl footer2-bottom-inner">
+      <span>© @DateTime.Now.Year · Adsum Pater — “Aquí estoy, Padre”</span>
+      <span class="footer2-note">Hecho con amor</span>
+    </div>
+  </div>
+</footer>
+
+</div>

@@ -1,0 +1,139 @@
+@page "/equipo"
+@using AdsumPater.Core.Entities
+@using AdsumPater.Core.Enums
+@using AdsumPater.Core.Interfaces
+@inject IEquipoService EquipoService
+
+<section class="page-head">
+    <div class="container-xl">
+        <h1>Equipo de Misión</h1>
+        <p class="muted">
+            Conocé a quienes organizan y sostienen la misión.
+        </p>
+    </div>
+</section>
+
+<section class="team-wrap">
+    <div class="container-xl">
+
+        @if (cargando)
+        {
+            <p class="muted">Cargando equipo...</p>
+        }
+        else if (miembros.Count == 0)
+        {
+            <p class="muted">Todavía no hay miembros cargados.</p>
+        }
+        else
+        {
+            <div class="team-grid">
+                @foreach (var group in grupos)
+                {
+                    <article class="group-card">
+                        <header class="group-head">
+                            <div class="group-title">
+                                <h2>@group.Area</h2>
+                                <span class="count">@group.Miembros.Count</span>
+                            </div>
+                            <p class="group-sub">@group.Descripcion</p>
+                        </header>
+
+                        <div class="members">
+                            @foreach (var m in group.Miembros)
+                            {
+                                <div class="member-card">
+                                    <div class="avatar" aria-hidden="true">
+                                        @Initials(m.Nombre, m.Apellido)
+                                    </div>
+
+                                    <div class="member-body">
+                                        <div class="member-top">
+                                            <div class="member-name">
+                                                <strong>@m.Nombre @m.Apellido</strong>
+                                                @if (!string.IsNullOrWhiteSpace(m.Apodo))
+                                                {
+                                                    <span class="nick">(@m.Apodo)</span>
+                                                }
+                                            </div>
+
+                                            <span class="pill">@RolLabel(m.Rol)</span>
+                                        </div>
+
+                                        <div class="member-meta">
+                                            <span class="meta-item">🎂 @m.Edad años</span>
+                                            <span class="meta-sep">•</span>
+                                            <span class="meta-item">🎓 @m.CarreraOProfesion</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+
+    </div>
+</section>
+
+@code {
+    private bool cargando = true;
+    private List<TeamMember> miembros = new();
+    private List<GroupVM> grupos = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        miembros = await EquipoService.ObtenerEquipoAsync();
+
+        // Agrupamos por RolEquipo
+        var porRol = miembros
+            .GroupBy(m => m.Rol)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        // Armamos la vista en el orden que te importa
+        grupos = new List<GroupVM>
+        {
+            NewGroup(RolEquipo.Rector, "Rectores", "Coordinan y guían la misión (jefes del año).", porRol),
+            NewGroup(RolEquipo.PenaYComunicacion, "Peña y Comunicación", "Animación, logística y difusión de la misión.", porRol),
+            NewGroup(RolEquipo.Infraestructura, "Infraestructura", "Materiales, recursos, armado y soporte general.", porRol),
+            NewGroup(RolEquipo.ViaCrucis, "Vía Crucis", "Planificación y coordinación del Vía Crucis.", porRol),
+            NewGroup(RolEquipo.Espiritualidad, "Espiritualidad", "Oración, momentos espirituales y acompañamiento.", porRol),
+            NewGroup(RolEquipo.Coro, "Coro", "Cantos, ensayos y animación musical.", porRol),
+            NewGroup(RolEquipo.Apostolado, "Apostolado", "Visitas, actividades y misión en el pueblo.", porRol),
+
+            // Si tenés Asesor/Asesora
+            NewGroup(RolEquipo.Asesor, "Asesores", "Acompañamiento y guía.", porRol),
+            NewGroup(RolEquipo.Asesora, "Asesoras", "Acompañamiento y guía.", porRol),
+        }
+        .Where(g => g.Miembros.Count > 0) // no mostrar grupos vacíos
+        .ToList();
+
+        cargando = false;
+    }
+
+    private static GroupVM NewGroup(RolEquipo rol, string area, string desc, Dictionary<RolEquipo, List<TeamMember>> porRol)
+        => new(area, desc, porRol.TryGetValue(rol, out var list) ? list : new List<TeamMember>());
+
+    private static string Initials(string nombre, string apellido)
+    {
+        var a = string.IsNullOrWhiteSpace(nombre) ? "?" : nombre.Trim()[0].ToString().ToUpper();
+        var b = string.IsNullOrWhiteSpace(apellido) ? "" : apellido.Trim()[0].ToString().ToUpper();
+        return (a + b).Trim();
+    }
+
+    private static string RolLabel(RolEquipo rol) => rol switch
+    {
+        RolEquipo.Rector => "Rector/a",
+        RolEquipo.PenaYComunicacion => "Peña/Comu",
+        RolEquipo.Infraestructura => "Infra",
+        RolEquipo.ViaCrucis => "Vía Crucis",
+        RolEquipo.Espiritualidad => "Espiritualidad",
+        RolEquipo.Coro => "Coro",
+        RolEquipo.Apostolado => "Apostolado",
+        RolEquipo.Asesor => "Asesor",
+        RolEquipo.Asesora => "Asesora",
+        _ => rol.ToString()
+    };
+
+    private record GroupVM(string Area, string Descripcion, List<TeamMember> Miembros);
+}
