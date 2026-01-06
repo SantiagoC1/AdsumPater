@@ -1,0 +1,384 @@
+@page "/historia"
+@rendermode InteractiveServer 
+
+<PageTitle>Historia - Adsum Pater</PageTitle>
+
+<section class="page-head">
+    <div class="container-xl">
+        <span class="badge">RECORRIDO</span>
+        <h1>Línea histórica</h1>
+        <p class="muted">
+            Adsum Pater es una misión-retiro universitaria de Semana Santa. Cada año volvemos
+            a decir “Sí, Padre” y caminar junto a un pueblo.
+        </p>
+    </div>
+</section>
+
+<section class="timeline-wrap">
+    <div class="container-xl timeline-grid">
+
+        <aside class="timeline-card" aria-label="Timeline de ediciones">
+            <div class="timeline-head">
+                <h2>Ediciones</h2>
+                <div class="pill">Desde @(Ediciones.Any() ? Ediciones.Min(e => e.Anio) : 2006)</div>
+            </div>
+
+            <div class="timeline">
+                @foreach (var item in Ediciones.OrderByDescending(e => e.Anio))
+                {
+                    <button type="button" class="tl-item" @onclick="() => OpenModal(item)">
+                        <div class="dot"></div>
+                        <div class="tl-body">
+                            <div class="tl-top">
+                                <div class="tl-year">@item.Anio</div>
+                                <div class="tl-place">@item.Lugar</div>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(item.Nota))
+                            {
+                                <div class="tl-note">@item.Nota</div>
+                            }
+                        </div>
+                    </button>
+                }
+            </div>
+
+            <div class="timeline-foot">
+                <div class="callout">
+                    <strong>Dato:</strong> la misión suele realizarse <strong>dos años seguidos</strong> en el mismo pueblo,
+                    para volver con más experiencia y profundizar el vínculo.
+                </div>
+            </div>
+        </aside>
+
+        <div class="years">
+            <div class="years-head">
+                <h2>Recuerdos por año</h2>
+                <p class="muted">
+                    Tocá un año para ver detalles, fotos y testimonios.
+                </p>
+            </div>
+
+            @foreach (var item in Ediciones.OrderByDescending(e => e.Anio))
+            {
+                <article class="year-card">
+                    <div class="year-top">
+                        <div class="year-chip">@item.Anio</div>
+                        <div class="year-title">
+                            <strong>@item.Lugar</strong>
+                            <span class="sep">·</span>
+                            <span class="small">@item.Provincia</span>
+                        </div>
+                    </div>
+
+                    <p class="year-text">@item.Descripcion</p>
+
+                    <div class="year-actions">
+                        <button type="button" class="btn ghost" @onclick="() => OpenModal(item)">
+                            Ver detalles
+                        </button>
+                        <a class="btn primary" href="/sumate">Sumate</a>
+                    </div>
+                </article>
+            }
+        </div>
+
+    </div>
+</section>
+
+<section class="note-band">
+    <div class="container-xl note-inner">
+        <div>
+            <h3>¿Qué hacemos en misión?</h3>
+            <p class="muted">
+                Misionamos casa por casa y realizamos actividades con la comunidad.
+            </p>
+        </div>
+        <div class="note-actions">
+            <a class="btn primary" href="/sumate">Sumate</a>
+            <a class="btn ghost" href="/contacto">Contactanos</a>
+        </div>
+    </div>
+</section>
+
+@* --- POPUP / MODAL --- *@
+@if (IsModalOpen && Selected is not null)
+{
+    <div class="modal-backdrop" @onclick="CloseModal"></div>
+
+    <section class="modal" role="dialog" aria-modal="true">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div class="modal-title">
+                    <span class="modal-year">@Selected.Anio</span>
+                    <div class="modal-place">
+                        <strong>@Selected.Lugar</strong>
+                        <span class="small">@Selected.Provincia</span>
+                    </div>
+                </div>
+                <button type="button" class="icon-btn" @onclick="CloseModal">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-info">
+                    <div class="info-card">
+                        <h3>Resumen</h3>
+                        <p class="muted">@Selected.Descripcion</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>Datos</h3>
+                        <ul class="facts">
+                            <li><strong>Ubicación:</strong> @Selected.Ubicacion</li>
+                            <li><strong>Parroquia:</strong> @Selected.Parroquia</li>
+                            <li><strong>Enfoque:</strong> @Selected.Enfoque</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="modal-media">
+                    <div class="carousel">
+                        <div class="carousel-frame">
+                            <img src="@CurrentPhotoUrl" alt="Foto @Selected.Lugar" />
+                            <div class="carousel-ind">
+                                @if(Selected.Fotos?.Count > 0) { <span>@(CurrentPhotoIndex + 1) / @Selected.Fotos.Count</span> }
+                            </div>
+                        </div>
+                        <div class="carousel-controls" style="margin-top:5px; justify-content:center; display:flex; gap:10px;">
+                             <button type="button" class="btn ghost" @onclick="PrevPhoto">Anterior</button>
+                             <button type="button" class="btn ghost" @onclick="NextPhoto">Siguiente</button>
+                        </div>
+                    </div>
+
+                    @if (Selected.Testimonios.Any())
+                    {
+                        <div class="testis">
+                             <h3>Testimonios</h3>
+                             @foreach(var t in Selected.Testimonios){
+                                 <div class="testi-card">
+                                     <p>“@t.Texto”</p>
+                                     <small>— @t.Autor (@t.Rol)</small>
+                                 </div>
+                             }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    // --- LÓGICA DE ESTADO ---
+    private List<Edicion> Ediciones = new();
+    private bool IsModalOpen;
+    private Edicion? Selected;
+    private int CurrentPhotoIndex = 0;
+
+    private string CurrentPhotoUrl => (Selected?.Fotos is { Count: > 0 } f) 
+        ? f[Math.Clamp(CurrentPhotoIndex, 0, f.Count - 1)] : "img/PortadaWeb.JPG";
+
+    protected override Task OnInitializedAsync()
+    {
+        Ediciones = LoadEdiciones();
+        return Task.CompletedTask;
+    }
+
+    private void OpenModal(Edicion item)
+    {
+        Selected = item;
+        CurrentPhotoIndex = 0;
+        IsModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        IsModalOpen = false;
+        Selected = null;
+    }
+
+    private void NextPhoto()
+    {
+        if (Selected?.Fotos is { Count: > 0 } f) CurrentPhotoIndex = (CurrentPhotoIndex + 1) % f.Count;
+    }
+
+    private void PrevPhoto()
+    {
+        if (Selected?.Fotos is { Count: > 0 } f) CurrentPhotoIndex = (CurrentPhotoIndex - 1 + f.Count) % f.Count;
+    }
+
+    // --- DEFINICIÓN DE DATOS ---
+    private record Testimonio(string Texto, string Autor, string Rol);
+    private record Edicion(int Anio, string Lugar, string Provincia, string Ubicacion, string Parroquia, string Enfoque, string Descripcion, string? Nota, List<string> Fotos, List<Testimonio> Testimonios);
+
+    // --- CARGA DE DATOS HISTÓRICOS (Adsum Pater) ---
+    private static List<Edicion> LoadEdiciones() => new()
+    {
+        new Edicion(
+            Anio: 2025,
+            Lugar: "Castelli",
+            Provincia: "Buenos Aires",
+            Ubicacion: "Partido de Castelli",
+            Parroquia: "Santa Rosa de Lima",
+            Enfoque: "Consolidación",
+            Descripcion: "Segunda visita consecutiva a Castelli. Volvemos con experiencia para profundizar el vínculo con la comunidad.",
+            Nota: "2° año",
+            Fotos: new() { "img/PortadaWeb.JPG" },
+            Testimonios: new() { new("La gente nos espera con gran ansia y alegría[cite: 204].", "Misionero", "Comunidad") }
+        ),
+        new Edicion(
+            Anio: 2024,
+            Lugar: "Castelli",
+            Provincia: "Buenos Aires",
+            Ubicacion: "Partido de Castelli",
+            Parroquia: "Santa Rosa de Lima",
+            Enfoque: "Primer Encuentro",
+            Descripcion: "Llegamos a Castelli para llevar a María casa por casa y encender los corazones[cite: 170].",
+            Nota: "1° año",
+            Fotos: new() { "img/PortadaWeb.JPG" },
+            Testimonios: new() { new("Somos un oído para el otro y un signo de esperanza[cite: 180].", "Joven", "Misionero") }
+        ),
+        new Edicion(
+            Anio: 2023,
+            Lugar: "Verónica",
+            Provincia: "Buenos Aires",
+            Ubicacion: "Punta Indio",
+            Parroquia: "Ntra. Sra. de Lourdes",
+            Enfoque: "Reencuentro",
+            Descripcion: "Volvimos a Verónica, un pueblo ya visitado años atrás, renovando la alianza con la comunidad[cite: 209].",
+            Nota: "Regreso histórico",
+            Fotos: new() { "img/PortadaWeb.JPG" },
+            Testimonios: new() { new("Compartimos entre nosotros y junto al pueblo la vida[cite: 174].", "Coordinador", "Logística") }
+        ),
+        new Edicion(
+            Anio: 2022,
+            Lugar: "Alejandro Korn",
+            Provincia: "Buenos Aires",
+            Ubicacion: "San Vicente",
+            Parroquia: "San Antonio de Padua",
+            Enfoque: "Post-Pandemia",
+            Descripcion: "El gran regreso a la misión presencial tras la pandemia. Vivimos la Semana Santa junto al pueblo[cite: 210].",
+            Nota: "Vuelta a la misión",
+            Fotos: new() { "img/PortadaWeb.JPG" },
+            Testimonios: new() { new("Rezamos junto a ellos y los invitamos a las actividades[cite: 187].", "Misionera", "Grupo") }
+        ),
+        new Edicion(
+            Anio: 2021,
+            Lugar: "—",
+            Provincia: "—",
+            Ubicacion: "—",
+            Parroquia: "—",
+            Enfoque: "Pausa",
+            Descripcion: "La misión presencial se vio interrumpida debido a la pandemia[cite: 211].",
+            Nota: "Interrupción x Pandemia",
+            Fotos: new(), 
+            Testimonios: new()
+        ),
+        new Edicion(
+            Anio: 2020,
+            Lugar: "—",
+            Provincia: "—",
+            Ubicacion: "—",
+            Parroquia: "—",
+            Enfoque: "Pausa",
+            Descripcion: "Interrupción de las actividades presenciales debido a la situación sanitaria[cite: 212].",
+            Nota: "Interrupción x Pandemia",
+            Fotos: new(), 
+            Testimonios: new()
+        ),
+        new Edicion(
+            Anio: 2019,
+            Lugar: "Etcheverry",
+            Provincia: "Buenos Aires",
+            Ubicacion: "La Plata (Oeste)",
+            Parroquia: "San Vicente de Paul",
+            Enfoque: "Misión Local",
+            Descripcion: "Misionamos en la periferia de nuestra propia ciudad, llevando el santuario a los vecinos[cite: 213].",
+            Nota: null,
+            Fotos: new() { "img/PortadaWeb.JPG" },
+            Testimonios: new() { new("Si Padre: si me animo, si quiero, si confío[cite: 177].", "Manual", "Misionero") }
+        ),
+        new Edicion(
+            Anio: 2018,
+            Lugar: "Ranchos",
+            Provincia: "Buenos Aires",
+            Ubicacion: "General Paz",
+            Parroquia: "Ntra. Sra. del Pilar",
+            Enfoque: "Profundización",
+            Descripcion: "Segundo año en Ranchos. La gran peña del sábado fue un momento clave de encuentro[cite: 214].",
+            Nota: "2° año",
+            Fotos: new() { "img/PortadaWeb.JPG" },
+            Testimonios: new() { new("La peña es el espacio para que los talentos locales se luzcan[cite: 184].", "Organizador", "Peña") }
+        ),
+        new Edicion(
+            Anio: 2017,
+            Lugar: "Ranchos",
+            Provincia: "Buenos Aires",
+            Ubicacion: "General Paz",
+            Parroquia: "Ntra. Sra. del Pilar",
+            Enfoque: "Apertura",
+            Descripcion: "Llegada a Ranchos. Visitamos hospitales, geriátricos y compartimos con jóvenes[cite: 215].",
+            Nota: "1° año",
+            Fotos: new() { "img/PortadaWeb.JPG" },
+          Testimonios: new() { new("Llevamos un mensaje de amor, esperanza y alegría[cite: 198].", "Misionero", "Visitas") }
+        ),
+        new Edicion(
+            Anio: 2016,
+            Lugar: "Verónica",
+            Provincia: "Buenos Aires",
+            Ubicacion: "Punta Indio",
+            Parroquia: "Ntra. Sra. de Lourdes",
+            Enfoque: "Comunidad",
+            Descripcion: "Segundo año consecutivo en Verónica, consolidando la presencia de la misión[cite: 216].",
+            Nota: "2° año",
+            Fotos: new() { "img/PortadaWeb.JPG" },
+            Testimonios: new()
+        ),
+        new Edicion(
+            Anio: 2015,
+            Lugar: "Verónica",
+            Provincia: "Buenos Aires",
+            Ubicacion: "Punta Indio",
+            Parroquia: "Ntra. Sra. de Lourdes",
+            Enfoque: "Inicio",
+            Descripcion: "Primera experiencia en Verónica, sembrando la semilla de la fe en la comunidad[cite: 217].",
+            Nota: "1° año",
+            Fotos: new() { "img/PortadaWeb.JPG" },
+            Testimonios: new()
+        ),
+        new Edicion(
+            Anio: 2014,
+            Lugar: "Bavio",
+            Provincia: "Buenos Aires",
+            Ubicacion: "General Mansilla",
+            Parroquia: "Sagrado Corazón",
+            Enfoque: "Despedida",
+            Descripcion: "Cierre de la etapa en Bavio tras dos años de compartir la Semana Santa[cite: 218].",
+            Nota: "2° año",
+            Fotos: new() { "img/PortadaWeb.JPG" },
+            Testimonios: new()
+        ),
+        new Edicion(
+            Anio: 2013,
+            Lugar: "Bavio",
+            Provincia: "Buenos Aires",
+            Ubicacion: "General Mansilla",
+            Parroquia: "Sagrado Corazón",
+            Enfoque: "Llegada",
+            Descripcion: "Inicio de la misión en Bavio. Llevamos a Cristo resucitado a los hogares[cite: 219].",
+            Nota: "1° año",
+            Fotos: new() { "img/PortadaWeb.JPG" },
+            Testimonios: new()
+        ),
+        new Edicion(
+            Anio: 2006,
+            Lugar: "Origen",
+            Provincia: "Buenos Aires",
+            Ubicacion: "—",
+            Parroquia: "—",
+            Enfoque: "Fundación",
+            Descripcion: "Año en que se originó Adsum Pater. El comienzo de este 'Sí, Padre'[cite: 206].",
+            Nota: "Fundación",
+            Fotos: new() { "img/PortadaWeb.JPG" },
+            Testimonios: new() { new("Adsum Pater-Aquí estoy, Padre[cite: 35].", "Fundadores", "Lema") }
+        )
+    };
+}

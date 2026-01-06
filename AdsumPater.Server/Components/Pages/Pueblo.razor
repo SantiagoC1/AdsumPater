@@ -1,0 +1,363 @@
+@page "/pueblo"
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+
+<PageTitle>Pueblo - Adsum Pater</PageTitle>
+
+<section class="page-head">
+    <div class="container-xl">
+        <span class="badge">DESTINO</span>
+        <h1>El pueblo al que vamos</h1>
+        <p class="muted">
+            Queremos que conozcas el lugar, su historia y por qué rezamos por esta misión.
+            (Por ahora lo dejamos en “pronto” hasta tener todo confirmado.)
+        </p>
+    </div>
+</section>
+
+<section class="pueblo-wrap">
+    <div class="container-xl">
+
+        <div class="pueblo-shell @((isRevealed) ? "revealed" : "")">
+
+            <!-- CONTENIDO REAL (queda difuminado mientras está bloqueado) -->
+            <div class="pueblo-content">
+                <div class="grid-2">
+
+                    <!-- Columna izquierda -->
+                    <article class="card">
+                        <div class="card-head">
+                            <h2>@pueblo.Nombre</h2>
+                            <div class="chip">@pueblo.Provincia, @pueblo.Pais</div>
+                        </div>
+
+                        <div class="facts">
+                            <div class="fact">
+                                <div class="fact-k">Ubicación</div>
+                                <div class="fact-v">@pueblo.UbicacionTexto</div>
+                            </div>
+                            <div class="fact">
+                                <div class="fact-k">Parroquia / Capilla</div>
+                                <div class="fact-v">@pueblo.Parroquia</div>
+                            </div>
+                            <div class="fact">
+                                <div class="fact-k">En misión</div>
+                                <div class="fact-v">@pueblo.FechaMision</div>
+                            </div>
+                        </div>
+
+                        <h3 class="sub">Historia local</h3>
+                        <p class="para">@pueblo.Historia</p>
+
+                        <h3 class="sub">Cómo es la comunidad</h3>
+                        <p class="para">@pueblo.Comunidad</p>
+                    </article>
+
+                    <!-- Columna derecha -->
+                    <aside class="stack">
+                        <div class="card map">
+                            <div class="card-head">
+                                <h2>Mapa</h2>
+                                <div class="chip">Referencia</div>
+                            </div>
+
+                            <div class="map-frame">
+                                <iframe
+                                    title="Mapa del pueblo"
+                                    src="@pueblo.MapaEmbedUrl"
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
+                            </div>
+
+                            <p class="hint">
+                                Cuando el pueblo esté confirmado, actualizamos el mapa con el embed exacto.
+                            </p>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-head">
+                                <h2>Necesidades y objetivos</h2>
+                                <div class="chip">Misión</div>
+                            </div>
+
+                            <ul class="list">
+                                @foreach (var n in pueblo.Necesidades)
+                                {
+                                    <li>@n</li>
+                                }
+                            </ul>
+
+                            <div class="divider"></div>
+
+                            <ul class="list">
+                                @foreach (var o in pueblo.Objetivos)
+                                {
+                                    <li><strong>@o</strong></li>
+                                }
+                            </ul>
+
+                            <div class="cta-row">
+                                <a class="btn ghost" href="/foro">Dejar intención</a>
+                                <a class="btn primary" href="/sumate">Sumate</a>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+
+                <!-- Fotos -->
+                <section class="photos">
+                    <div class="section-head">
+                        <h2>Fotos de la parroquia / capilla</h2>
+                        <p class="muted">Imágenes de referencia (luego las reemplazamos por fotos reales).</p>
+                    </div>
+
+                    <div class="photo-grid">
+                        @foreach (var ph in pueblo.Fotos)
+                        {
+                            <figure class="ph">
+                                <img src="@ph.Url" alt="@ph.Alt" />
+                                <figcaption>@ph.Caption</figcaption>
+                            </figure>
+                        }
+                    </div>
+                </section>
+
+                <!-- Cronograma -->
+                <section class="schedule">
+                    <div class="section-head">
+                        <h2>Cronograma abierto</h2>
+                        <p class="muted">Actividades con la comunidad (ejemplo base, se actualiza cuando se confirme).</p>
+                    </div>
+
+                    <div class="schedule-grid">
+                        @foreach (var day in pueblo.Cronograma)
+                        {
+                            <div class="day">
+                                <div class="day-head">
+                                    <div class="day-title">@day.Dia</div>
+                                    <div class="chip">@day.Titulo</div>
+                                </div>
+
+                                <ul class="slots">
+                                    @foreach (var s in day.Actividades)
+                                    {
+                                        <li>
+                                            <span class="time">@s.Hora</span>
+                                            <span class="text">@s.Descripcion</span>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                </section>
+
+                <section class="bottom-note">
+                    <div class="note">
+                        <div>
+                            <h3>¿Querés rezar por este lugar?</h3>
+                            <p class="muted">
+                                Dejá una intención en el foro: las vamos a incluir en la preparación y en la misión.
+                            </p>
+                        </div>
+                        <div class="note-actions">
+                            <a class="btn primary" href="/foro">Dejar intención</a>
+                            <a class="btn ghost" href="/contacto">Contactarnos</a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- OVERLAY "PRONTO" + CUENTA REGRESIVA -->
+            @if (!isRevealed)
+            {
+                <div class="overlay" role="dialog" aria-modal="true" aria-label="Contenido pronto disponible">
+                    <div class="overlay-card">
+                        <div class="overlay-badge">PRONTO</div>
+                        <h2>Estamos confirmando el próximo destino</h2>
+                        <p>
+                            Apenas esté definido el pueblo, acá vas a encontrar su historia,
+                            el mapa, fotos y el cronograma abierto.
+                        </p>
+
+                        <div class="countdown">
+                            <div class="cd-item">
+                                <div class="cd-num">@timeLeft.Days</div>
+                                <div class="cd-lbl">días</div>
+                            </div>
+                            <div class="cd-sep">:</div>
+                            <div class="cd-item">
+                                <div class="cd-num">@timeLeft.Hours.ToString("00")</div>
+                                <div class="cd-lbl">hs</div>
+                            </div>
+                            <div class="cd-sep">:</div>
+                            <div class="cd-item">
+                                <div class="cd-num">@timeLeft.Minutes.ToString("00")</div>
+                                <div class="cd-lbl">min</div>
+                            </div>
+                            <div class="cd-sep">:</div>
+                            <div class="cd-item">
+                                <div class="cd-num">@timeLeft.Seconds.ToString("00")</div>
+                                <div class="cd-lbl">seg</div>
+                            </div>
+                        </div>
+
+                        <div class="overlay-actions">
+                            <a class="btn primary" href="/foro">Dejar intención</a>
+                            <a class="btn ghost" href="/sumate">Sumate</a>
+                        </div>
+
+                        <div class="tiny">
+                            *Esto se desbloquea automáticamente cuando el contador llega a 0.
+                            (Podés cambiar la fecha en el código.)
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    // ✅ Cambiá esta fecha cuando quieras: cuando llegue, se revela todo.
+    // Para probar: DateTimeOffset.Now.AddMinutes(1)
+    private readonly DateTimeOffset RevealAt =
+        new DateTimeOffset(2026, 02, 20, 00, 00, 00, TimeSpan.FromHours(-3));
+
+    private CancellationTokenSource? _cts;
+    private PeriodicTimer? _periodic;
+
+    private bool isRevealed;
+    private TimeSpan timeLeft = TimeSpan.Zero;
+
+    // Datos mockeados (luego salen de DB / servicio).
+    private PuebloViewModel pueblo = new()
+    {
+        Nombre = "Por confirmar",
+        Provincia = "Argentina",
+        Pais = "—",
+        UbicacionTexto = "Se publicará cuando el destino esté confirmado.",
+        Parroquia = "—",
+        FechaMision = "Semana Santa (a confirmar)",
+        Historia = "Apenas confirmemos el lugar, vamos a contar su historia, su identidad y cómo nació la comunidad.",
+        Comunidad = "Vamos a compartir cómo es la vida del pueblo, su dinámica, la parroquia y las actividades que lo sostienen.",
+        MapaEmbedUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d26261.220551800615!2d-58.3816!3d-34.6037!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccacbf1b2b1ff%3A0x2df0c8df2e9f2d1a!2sBuenos%20Aires!5e0!3m2!1ses!2sar!4v0000000000000",
+        Necesidades = new()
+        {
+            "Conocer las realidades de las familias (escucha casa por casa).",
+            "Acompañar a niños y jóvenes en propuestas comunitarias.",
+            "Fortalecer la vida de fe (misa, oración, vía crucis, encuentro)."
+        },
+        Objetivos = new()
+        {
+            "Encuentro y escucha: visitar, acompañar y rezar con la gente.",
+            "Construir comunidad: actividades abiertas con niños/jóvenes/familias.",
+            "Dejar huella: volver con continuidad y consolidar vínculos."
+        },
+        Fotos = new()
+        {
+            new Foto("img/PortadaWeb.JPG", "Foto 1", "Referencia (luego reemplazamos)"),
+            new Foto("img/PortadaWeb.JPG", "Foto 2", "Referencia (luego reemplazamos)"),
+            new Foto("img/PortadaWeb.JPG", "Foto 3", "Referencia (luego reemplazamos)")
+        },
+        Cronograma = new()
+        {
+            new DiaCrono("Jueves", "Llegada y encuentro", new()
+            {
+                new Slot("10:00", "Arribo, distribución y puesta a punto"),
+                new Slot("17:00", "Visitas y encuentro con la comunidad"),
+                new Slot("21:00", "Oración y cierre del día")
+            }),
+            new DiaCrono("Viernes", "Casa por casa", new()
+            {
+                new Slot("09:00", "Salida casa por casa (grupos de 2/3)"),
+                new Slot("16:00", "Actividades con niños y jóvenes"),
+                new Slot("20:00", "Vía Crucis con el pueblo")
+            }),
+            new DiaCrono("Sábado", "Comunidad y peña", new()
+            {
+                new Slot("09:00", "Casa por casa / acompañamientos"),
+                new Slot("18:00", "Misa con la comunidad"),
+                new Slot("21:30", "Peña / encuentro fraterno")
+            })
+        }
+    };
+
+    // ✅ Arrancamos el timer cuando el componente YA es interactivo
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        Tick(); // primera medición
+
+        _cts = new CancellationTokenSource();
+        _periodic = new PeriodicTimer(TimeSpan.FromSeconds(1));
+
+        try
+        {
+            while (await _periodic.WaitForNextTickAsync(_cts.Token))
+            {
+                Tick();
+                await InvokeAsync(StateHasChanged);
+
+                if (isRevealed)
+                    break;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // ok al navegar / dispose
+        }
+    }
+
+    private void Tick()
+    {
+        var now = DateTimeOffset.Now;
+
+        if (now >= RevealAt)
+        {
+            isRevealed = true;
+            timeLeft = TimeSpan.Zero;
+            return;
+        }
+
+        timeLeft = RevealAt - now;
+        isRevealed = false;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            _cts?.Cancel();
+        }
+        catch { /* ignore */ }
+
+        _periodic?.Dispose();
+        _cts?.Dispose();
+
+        await Task.CompletedTask;
+    }
+
+    private sealed class PuebloViewModel
+    {
+        public string Nombre { get; set; } = "";
+        public string Provincia { get; set; } = "";
+        public string Pais { get; set; } = "";
+        public string UbicacionTexto { get; set; } = "";
+        public string Parroquia { get; set; } = "";
+        public string FechaMision { get; set; } = "";
+        public string Historia { get; set; } = "";
+        public string Comunidad { get; set; } = "";
+        public string MapaEmbedUrl { get; set; } = "";
+        public List<string> Necesidades { get; set; } = new();
+        public List<string> Objetivos { get; set; } = new();
+        public List<Foto> Fotos { get; set; } = new();
+        public List<DiaCrono> Cronograma { get; set; } = new();
+    }
+
+    private sealed record Foto(string Url, string Alt, string Caption);
+    private sealed record DiaCrono(string Dia, string Titulo, List<Slot> Actividades);
+    private sealed record Slot(string Hora, string Descripcion);
+}

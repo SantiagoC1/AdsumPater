@@ -30,7 +30,7 @@
   text-decoration:none;
 }
 .brand :hover{
-  text-decoration: underline #f7a343 ;
+  text-decoration: underline #f7a343;
   color: #f7a343;
 }
 
@@ -61,7 +61,7 @@
   font-size: 14px;
   padding: 6px 10px;
   border-radius: 999px;
-  text-decoration:none;
+  text-decoration: none;
 }
 
 .nav a:hover{

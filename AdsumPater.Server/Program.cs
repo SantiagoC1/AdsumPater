@@ -2,6 +2,7 @@ using AdsumPater.Server.Components;
 using Microsoft.EntityFrameworkCore;
 using AdsumPater.Core.Interfaces;
 using AdsumPater.Infrastructure.Services;
+using AdsumPater.Infrastructure.Data;
 
 
 
@@ -13,6 +14,9 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContext<AdsumPaterDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IEquipoService, EquipoService>();
+builder.Services.AddScoped<IForoService, ForoService>();
+
+
 
 
 

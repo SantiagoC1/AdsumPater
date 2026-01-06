@@ -1,0 +1,88 @@
+@page "/galeria"
+
+<PageTitle>Galeria - Adsum Pater</PageTitle>
+
+<section class="page-head">
+    <div class="container-xl">
+        <span class="badge">IMÁGENES</span>
+        <h1>Galería de la misión</h1>
+        <p class="muted">
+            Algunos momentos que fueron marcando nuestro caminar por los pueblos.
+        </p>
+    </div>
+</section>
+
+<section class="gallery-wrap">
+    <div class="container-xl">
+
+        @foreach (var grupo in GaleriaPorAnio)
+        {
+            <div class="gallery-group">
+                <div class="group-head">
+                    <h2>@grupo.Anio — @grupo.Pueblo</h2>
+                    <span class="count">@grupo.Fotos.Count fotos</span>
+                </div>
+
+                <div class="gallery-grid">
+                    @foreach (var foto in grupo.Fotos)
+                    {
+                        <button class="photo"
+                                style="background-image:url('@foto.Url')"
+                                @onclick="() => AbrirModal(foto)">
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+
+    </div>
+</section>
+
+@if (FotoSeleccionada is not null)
+{
+    <div class="modal-backdrop" @onclick="CerrarModal">
+        <div class="modal" @onclick:stopPropagation>
+            <img src="@FotoSeleccionada.Url" alt="foto misión" />
+            @if (!string.IsNullOrWhiteSpace(FotoSeleccionada.Descripcion))
+            {
+                <p>@FotoSeleccionada.Descripcion</p>
+            }
+            <button class="close" @onclick="CerrarModal">✕</button>
+        </div>
+    </div>
+}
+
+@code {
+    // 🔜 Esto después viene de DB
+    private List<GaleriaGrupo> GaleriaPorAnio = new()
+    {
+        new GaleriaGrupo(
+            2024,
+            "Castelli",
+            new()
+            {
+                new Foto("img/galeria/castelli1.jpg", "Misión casa por casa"),
+                new Foto("img/galeria/castelli2.jpg", "Celebración con la comunidad"),
+                new Foto("img/galeria/castelli3.jpg", "Vía Crucis actuado")
+            }
+        ),
+        new GaleriaGrupo(
+            2023,
+            "Verónica",
+            new()
+            {
+                new Foto("img/galeria/veronica1.jpg"),
+                new Foto("img/galeria/veronica2.jpg"),
+                new Foto("img/galeria/veronica3.jpg")
+            }
+        )
+    };
+
+    private Foto? FotoSeleccionada;
+
+    void AbrirModal(Foto foto) => FotoSeleccionada = foto;
+    void CerrarModal() => FotoSeleccionada = null;
+
+    record GaleriaGrupo(int Anio, string Pueblo, List<Foto> Fotos);
+    record Foto(string Url, string? Descripcion = null);
+}

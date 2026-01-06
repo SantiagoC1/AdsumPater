@@ -1,0 +1,293 @@
+@page "/admin/foro"
+@rendermode InteractiveServer
+@using AdsumPater.Core.Enums
+@using AdsumPater.Core.Interfaces
+@using UglyToad.PdfPig 
+@using System.Threading 
+@inject IForoService ForoService
+@inject NavigationManager Nav
+@implements IDisposable
+
+<PageTitle>Admin - Adsum Pater</PageTitle>
+
+<section class="page-head" style="background-color: #333; color: white;">
+    <div class="container-xl">
+        <h1>🛠️ Panel de Administración</h1>
+    </div>
+</section>
+
+<section class="wrap">
+    <div class="container-xl">
+
+        @if (!isLogged)
+        {
+            <div class="card" style="max-width: 400px; margin: 40px auto; padding: 20px;">
+                <h3>Acceso Restringido</h3>
+                <input type="password" @bind="passwordInput" placeholder="Contraseña..." style="width:100%; margin-bottom: 10px; padding: 8px;" />
+                <button class="btn primary" @onclick="Login" style="width:100%">Entrar</button>
+            </div>
+        }
+        else
+        {
+            <div class="tabs">
+                <button class="tab @(activeTab == 1 ? "active" : "")" @onclick="() => activeTab = 1">
+                    Moderar Intenciones 
+                    @if(Pendientes.Count > 0) 
+                    { 
+                        <span style="background:red; color:white; border-radius:50%; padding:2px 6px; font-size:0.7em; margin-left:5px;">@Pendientes.Count</span> 
+                    }
+                </button>
+                <button class="tab @(activeTab == 2 ? "active" : "")" @onclick="() => activeTab = 2">Gestión Reflexiones</button>
+                <button class="tab" @onclick="Logout" style="margin-left: auto; color: red;">Salir</button>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                
+                @if (activeTab == 1)
+                {
+                    <header class="card-head">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h2>Intenciones Pendientes</h2>
+                            @if(loadingBackground)
+                            {
+                                <span class="muted small">🔄 Actualizando...</span>
+                            }
+                        </div>
+                    </header>
+                    @if (Pendientes.Count == 0)
+                    {
+                        <div class="empty">¡Todo limpio! No hay nada pendiente.</div>
+                    }
+                    else
+                    {
+                        <div class="list">
+                            @foreach (var p in Pendientes)
+                            {
+                                <div class="item" style="border-left: 4px solid orange;">
+                                    <div class="item-top">
+                                        <strong>@(p.Nombre ?? "Anónimo")</strong>
+                                        <span class="muted small">@p.Fecha.ToLocalTime().ToString("g")</span>
+                                    </div>
+                                    <div class="item-text">@p.Texto</div>
+                                    <div class="item-actions">
+                                        <button class="btn" style="background: #dfeeef; color: #007f80;" @onclick="() => Aprobar(p)">✅ Aprobar</button>
+                                        <button class="btn" style="background: #ffecec; color: #c00;" @onclick="() => Rechazar(p)">❌ Rechazar</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+                
+                @if (activeTab == 2)
+                {
+                    <header class="card-head">
+                        <h2>Publicar Reflexión</h2>
+                        <p class="muted">Escribí manualmente o subí un PDF para autocompletar.</p>
+                    </header>
+                    
+                    <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 2px dashed #ccc;">
+                        <strong>📂 Autocompletar desde PDF:</strong>
+                        <InputFile OnChange="CargarDesdePdf" accept=".pdf" class="form-control" />
+                        @if (procesandoPdf)
+                        {
+                            <span style="color: blue;">Leyendo archivo... ⏳</span>
+                        }
+                    </div>
+
+                    <div class="form-grid">
+                        <label class="field">
+                            <span>Título</span>
+                            <input @bind="refTitulo" placeholder="Ej: Jueves Santo..." />
+                        </label>
+                        <label class="field">
+                            <span>Autor</span>
+                            <input @bind="refAutor" placeholder="Ej: Equipo Adsum..." />
+                        </label>
+                        <label class="field field-full">
+                            <span>Contenido</span>
+                            <textarea rows="10" @bind="refContenido" placeholder="Escribí la reflexión..."></textarea>
+                        </label>
+                        <div class="field-full">
+                             <button class="btn primary" @onclick="PublicarReflexion">Publicar Ahora</button>
+                             <span style="color: green; margin-left: 10px;">@refMsg</span>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 30px 0; border:0; border-top:1px solid #eee;" />
+
+                    <h3>Reflexiones Activas</h3>
+                    @foreach(var r in ReflexionesActivas)
+                    {
+                        <div class="item">
+                            <div class="item-top">
+                                <strong>@r.Titulo</strong>
+                                <span class="muted small">@r.Fecha.ToLocalTime().ToString("d")</span>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn ghost" @onclick="() => BorrarRef(r.Id)">🗑️ Borrar</button>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    private bool isLogged = false;
+    private string passwordInput = "";
+    private const string ADMIN_PASS = "adsum2026"; 
+    private int activeTab = 1;
+
+    private List<AdsumPater.Core.Entities.Intencion> Pendientes = new();
+    private List<AdsumPater.Core.Entities.Reflexion> ReflexionesActivas = new();
+
+    // Form Reflexiones
+    private string refTitulo = "";
+    private string refAutor = "Espiritualidad Adsum Pater";
+    private string refContenido = "";
+    private string refMsg = "";
+    private bool procesandoPdf = false;
+    
+    // --- TIMER AUTOMÁTICO ---
+    private PeriodicTimer? timer;
+    private CancellationTokenSource? cts;
+    private bool loadingBackground = false;
+
+    private void Login()
+    {
+        if (passwordInput == ADMIN_PASS) 
+        { 
+            isLogged = true; 
+            
+            // 1. Carga inicial
+            _ = CargarDatos();
+
+            // 2. Iniciar Timer (Cada 5 seg)
+            StartTimer();
+        }
+    }
+
+    private void Logout() 
+    { 
+        StopTimer();
+        isLogged = false; 
+        passwordInput = ""; 
+        Pendientes.Clear(); 
+    }
+
+    private void StartTimer()
+    {
+        StopTimer(); // Asegurar limpieza previa
+        cts = new CancellationTokenSource();
+        timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+        _ = RunTimerAsync();
+    }
+
+    private void StopTimer()
+    {
+        cts?.Cancel();
+        cts?.Dispose();
+        timer?.Dispose();
+        cts = null;
+        timer = null;
+    }
+
+    private async Task RunTimerAsync()
+    {
+        try
+        {
+            while (await timer!.WaitForNextTickAsync(cts!.Token))
+            {
+                loadingBackground = true;
+                await InvokeAsync(StateHasChanged);
+                
+                // Actualizamos datos silenciosamente
+                await CargarDatos();
+                
+                loadingBackground = false;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private async Task CargarDatos()
+    {
+        // Guardamos las listas nuevas
+        var nuevasPendientes = await ForoService.GetPendientesAsync();
+        var nuevasReflexiones = await ForoService.ObtenerReflexionesAprobadasAsync();
+        
+        Pendientes = nuevasPendientes;
+        ReflexionesActivas = nuevasReflexiones;
+        
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        StopTimer();
+    }
+
+    // --- ACCIONES ---
+
+    private async Task Aprobar(AdsumPater.Core.Entities.Intencion item)
+    {
+        await ForoService.AprobarAsync(item.Id);
+        // Recargamos manual para feedback instantáneo
+        await CargarDatos(); 
+    }
+
+    private async Task Rechazar(AdsumPater.Core.Entities.Intencion item)
+    {
+        await ForoService.RechazarAsync(item.Id);
+        await CargarDatos();
+    }
+
+    private async Task PublicarReflexion()
+    {
+        if (string.IsNullOrWhiteSpace(refTitulo) || string.IsNullOrWhiteSpace(refContenido)) return;
+        await ForoService.CrearReflexionAsync(refTitulo, refContenido, refAutor);
+        refTitulo = ""; refContenido = ""; refMsg = "¡Publicada correctamente!";
+        await CargarDatos();
+    }
+
+    private async Task BorrarRef(Guid id)
+    {
+        await ForoService.EliminarReflexionAsync(id);
+        await CargarDatos();
+    }
+
+    private async Task CargarDesdePdf(InputFileChangeEventArgs e)
+    {
+        procesandoPdf = true;
+        refMsg = "";
+        try
+        {
+            var maxFileSize = 1024 * 1024 * 5; 
+            using var stream = e.File.OpenReadStream(maxFileSize);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            ms.Position = 0;
+
+            using (var document = PdfDocument.Open(ms))
+            {
+                var textoCompleto = "";
+                foreach (var page in document.GetPages()) textoCompleto += page.Text + "\n\n";
+
+                var lineas = textoCompleto.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                if (lineas.Length > 0)
+                {
+                    refTitulo = lineas[0].Trim();
+                    if (lineas.Length > 1) refContenido = string.Join("\n", lineas.Skip(1)).Trim();
+                    else refContenido = "No se detectó contenido adicional.";
+                }
+            }
+            refMsg = "Texto extraído del PDF. ¡Revisalo antes de publicar!";
+        }
+        catch (Exception ex) { refMsg = "Error al leer PDF: " + ex.Message; }
+        finally { procesandoPdf = false; }
+    }
+}

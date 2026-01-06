@@ -1,0 +1,244 @@
+/* DEFINICIÓN DE VARIABLES (Tu Paleta) */
+:root {
+    --azul: #c2e2ff;
+    --amarillo: #f7a343;
+    --marron: #281b13;
+    --rojo: #b01b18;
+    --blanco: #faf6f5;
+    --gris-claro: #e5e5e5;
+}
+
+/* ESTRUCTURA GENERAL */
+.wrap {
+    background-color: var(--blanco);
+    min-height: 80vh;
+    padding: 2rem 0;
+}
+
+.container-xl {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* CABECERA (Sobreescribe el estilo inline si lo quitas del HTML) */
+.page-head {
+    background-color: var(--marron) !important; /* Forzamos tu marrón */
+    color: var(--blanco);
+    padding: 2rem 0;
+    margin-bottom: 0;
+}
+
+.page-head h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 300;
+}
+
+/* TARJETAS */
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(40, 27, 19, 0.08); /* Sombra suave color marrón */
+    padding: 2rem;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.card-head {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--gris-claro);
+    padding-bottom: 1rem;
+}
+
+.card-head h2 {
+    color: var(--marron);
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+/* TABS DE NAVEGACIÓN */
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 1px;
+}
+
+.tab {
+    background: transparent;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--marron);
+    opacity: 0.6;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.tab:hover {
+    opacity: 1;
+    background-color: rgba(194, 226, 255, 0.2); /* Azul muy suave */
+}
+
+.tab.active {
+    opacity: 1;
+    border-bottom-color: var(--amarillo); /* Tu amarillo destacado */
+    font-weight: bold;
+}
+
+/* FORMULARIOS */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.field-full {
+    grid-column: 1 / -1;
+}
+
+.field span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--marron);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input, textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    background-color: #fff;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--amarillo);
+    box-shadow: 0 0 0 3px rgba(247, 163, 67, 0.1);
+}
+
+/* BOTONES */
+.btn {
+    padding: 10px 20px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* Botón Primario (Acciones principales) */
+.btn.primary {
+    background-color: var(--marron);
+    color: var(--blanco);
+}
+
+.btn.primary:hover {
+    background-color: #3e2b1f; /* Un marrón un poco más claro */
+}
+
+/* Botón Fantasma (Borrar, Secundarios) */
+.btn.ghost {
+    background-color: transparent;
+    color: var(--marron);
+    border: 1px solid #ddd;
+}
+
+.btn.ghost:hover {
+    background-color: #f0f0f0;
+    border-color: #bbb;
+}
+
+/* LISTAS E ITEMS */
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.item {
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    transition: box-shadow 0.2s;
+}
+
+.item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--marron);
+}
+
+.item-top strong {
+    font-size: 1.1rem;
+}
+
+.item-text {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+    padding: 0.5rem;
+    background-color: var(--blanco);
+    border-radius: 4px;
+}
+
+.item-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* UTILIDADES DE TEXTO */
+.muted {
+    color: #777;
+}
+
+.small {
+    font-size: 0.85rem;
+}
+
+.empty {
+    text-align: center;
+    padding: 3rem;
+    color: #999;
+    font-style: italic;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+/* MENSAJES DE ESTADO */
+.hint {
+    font-size: 0.9rem;
+    margin-left: 10px;
+}

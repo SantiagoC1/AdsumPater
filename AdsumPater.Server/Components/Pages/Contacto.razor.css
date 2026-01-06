@@ -1,0 +1,340 @@
+/* ===== Page head ===== */
+.page-head{
+  padding: 28px 0 12px;
+}
+
+.head-inner{
+  display:flex;
+  gap: 14px;
+  align-items:flex-start;
+}
+
+.kicker{
+  width: 48px;
+  height: 48px;
+  border-radius: 18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(194,226,255,.55);
+  border: 1px solid rgba(40,27,19,.10);
+  box-shadow: var(--shadow);
+  font-size: 22px;
+  flex: 0 0 auto;
+}
+
+.head-text h1{
+  margin: 0 0 6px;
+  font-size: 34px;
+  letter-spacing: -.2px;
+  color: var(--marron);
+}
+
+.muted{
+  opacity: .85;
+  margin: 0;
+  color: rgba(40,27,19,.85);
+}
+
+.small{ font-size: 12px; }
+
+.actions{
+  margin-top: 14px;
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===== Buttons ===== */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  text-decoration:none;
+  font-weight: 900;
+  font-size: 13px;
+  border: 1px solid rgba(40,27,19,.18);
+  background: rgba(250,246,245,.95);
+  color: var(--marron);
+  cursor: pointer;
+}
+
+.btn.primary{
+  background: var(--rojo);
+  color: var(--blanco);
+  border-color: rgba(176,27,24,.35);
+}
+
+.btn.primary:hover{
+  filter: brightness(1.05);
+}
+
+.btn.ghost{
+  background: transparent;
+}
+
+.btn.ghost:hover{
+  background: rgba(194,226,255,.30);
+  border-color: rgba(194,226,255,.65);
+}
+
+/* ===== Layout ===== */
+.contact-wrap{
+  padding: 18px 0 52px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns: 1.2fr .9fr;
+  gap: 16px;
+  align-items:start;
+}
+
+/* ===== Cards ===== */
+.card{
+  background: rgba(250,246,245,.95);
+  border: 1px solid rgba(40,27,19,.12);
+  border-radius: 22px;
+  box-shadow: 0 12px 26px rgba(0,0,0,.06);
+  overflow: hidden;
+}
+
+.card-head{
+  padding: 16px 16px 10px;
+  border-bottom: 1px solid rgba(40,27,19,.08);
+  background:
+    radial-gradient(520px 160px at 12% 20%, rgba(194,226,255,.22), transparent 55%),
+    radial-gradient(520px 160px at 86% 10%, rgba(176,27,24,.12), transparent 55%),
+    rgba(250,246,245,.95);
+}
+
+.card-head h2{
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: var(--marron);
+}
+
+/* ===== Form ===== */
+.form-grid{
+  padding: 14px 16px 16px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap: 6px;
+  font-size: 12px;
+  color: rgba(40,27,19,.85);
+}
+
+.field span{ font-weight: 800; }
+
+.field input,
+.field textarea{
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(40,27,19,.18);
+  background: rgba(255,255,255,.85);
+  padding: 10px 12px;
+  outline: none;
+  font-size: 13px;
+  color: var(--marron);
+}
+
+.field input:focus,
+.field textarea:focus{
+  border-color: rgba(194,226,255,.95);
+  box-shadow: 0 0 0 4px rgba(194,226,255,.35);
+}
+
+.field-full{ grid-column: 1 / -1; }
+
+.form-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hint{
+  font-size: 12px;
+  opacity: .75;
+}
+
+/* ===== Side column ===== */
+.side{
+  display:flex;
+  flex-direction:column;
+  gap: 16px;
+}
+
+/* Info list */
+.info-list{
+  padding: 14px 16px 16px;
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+}
+
+.info-item{
+  display:flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(40,27,19,.10);
+  background: rgba(255,255,255,.75);
+}
+
+.icon{
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(194,226,255,.45);
+  border: 1px solid rgba(40,27,19,.08);
+  flex: 0 0 auto;
+}
+
+.label{
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 2px;
+  color: rgba(40,27,19,.75);
+}
+
+.value{
+  font-size: 13px;
+  color: var(--marron);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.value:hover{ text-decoration: underline; }
+
+/* ===== Map ===== */
+.stack{
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+}
+
+.map-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+}
+
+.chip{
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration:none;
+  color: var(--rojo);
+  background: rgba(176,27,24,.10);
+  border: 1px solid rgba(176,27,24,.22);
+  padding: 6px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.map-frame{
+  position: relative;
+  height: 260px;
+  border-top: 1px solid rgba(40,27,19,.08);
+  background: rgba(40,27,19,.06);
+  overflow: hidden;
+}
+
+.map-frame iframe{
+  width: 100%;
+  height: 100%;
+  border: 0;
+  filter: saturate(.95) contrast(.98);
+}
+
+/* Overlay para tapar UI fea de Google Maps */
+.map-scrim{
+  position:absolute;
+  inset:0;
+  background: linear-gradient(
+    180deg,
+    rgba(40,27,19,0) 0%,
+    rgba(40,27,19,.12) 55%,
+    rgba(40,27,19,.55) 100%
+  );
+  pointer-events:none;
+}
+
+/* CTA sobre el mapa */
+.map-cta{
+  position:absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display:flex;
+  flex-direction:column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  text-decoration:none;
+  background: rgba(40,27,19,.86);
+  color: var(--blanco);
+  border: 1px solid rgba(194,226,255,.18);
+  box-shadow: 0 12px 26px rgba(0,0,0,.20);
+}
+
+.map-cta:hover{
+  transform: translateY(-1px);
+}
+
+.map-cta .muted{
+  color: rgba(250,246,245,.85);
+}
+
+/* ===== Donate ===== */
+.donate{
+  border-radius: 22px;
+  background: rgba(40,27,19,.92);
+  color: var(--blanco);
+  border: 1px solid rgba(194,226,255,.18);
+  box-shadow: var(--shadow);
+}
+
+.donate-inner{
+  padding: 16px;
+  display:flex;
+  gap: 14px;
+  align-items:flex-end;
+  justify-content:space-between;
+  flex-wrap: wrap;
+}
+
+.donate h3{
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.donate .muted{
+  color: rgba(250,246,245,.88);
+}
+
+.donate-actions{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 980px){
+  .grid{ grid-template-columns: 1fr; }
+  .form-grid{ grid-template-columns: 1fr; }
+  .map-frame{ height: 240px; }
+}

@@ -1,0 +1,161 @@
+@page "/contacto"
+@rendermode InteractiveServer
+@inject NavigationManager Nav
+
+<PageTitle>Contacto - Adsum Pater</PageTitle>
+
+<section class="page-head">
+    <div class="container-xl head-inner">
+        <div class="kicker">📱</div>
+
+        <div class="head-text">
+            <h1>Contacto</h1>
+            <p class="muted">
+                Canales para escribirnos, sumar intenciones o ayudar a la misión.
+            </p>
+
+            <div class="actions">
+                <button class="btn primary" type="button" @onclick="GoForo">
+                    Sumar una intención
+                </button>
+
+                <a class="btn ghost" href="mailto:contacto@adsumpater.org">
+                    Enviar mail
+                </a>
+
+                <a class="btn ghost" href="https://instagram.com/adsumpater" target="_blank" rel="noopener">
+                    Instagram
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="contact-wrap">
+    <div class="container-xl grid">
+
+        <!-- Form -->
+        <article class="card form-card">
+            <header class="card-head">
+                <h2>Escribinos</h2>
+                <p class="muted small">Te leemos y respondemos apenas podamos.</p>
+            </header>
+
+            <div class="form-grid">
+                <label class="field">
+                    <span>Nombre</span>
+                    <input placeholder="Tu nombre" />
+                </label>
+
+                <label class="field">
+                    <span>Email</span>
+                    <input placeholder="tucorreo@ejemplo.com" />
+                </label>
+
+                <label class="field field-full">
+                    <span>Mensaje</span>
+                    <textarea rows="5" placeholder="¿En qué te gustaría ayudar o qué querés contarnos?"></textarea>
+                </label>
+
+                <div class="form-actions field-full">
+                    <button class="btn primary" type="button">
+                        Enviar mensaje
+                    </button>
+                    <span class="hint">Por ahora no guarda en DB (después lo conectamos).</span>
+                </div>
+            </div>
+        </article>
+
+        <!-- Right column -->
+        <aside class="side">
+
+            <!-- Contact methods -->
+            <article class="card info-card">
+                <header class="card-head">
+                    <h2>Otros medios</h2>
+                    <p class="muted small">Para coordinar, rezar con ustedes o sumarte.</p>
+                </header>
+
+                <div class="info-list">
+                    <div class="info-item">
+                        <div class="icon">✉️</div>
+                        <div class="info-body">
+                            <div class="label">Correo</div>
+                            <a class="value" href="mailto:contacto@adsumpater.org">contacto@adsumpater.org</a>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="icon">📷</div>
+                        <div class="info-body">
+                            <div class="label">Instagram</div>
+                            <a class="value" href="https://instagram.com/adsumpater" target="_blank" rel="noopener">adsumpater</a>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="icon">📍</div>
+                        <div class="info-body">
+                            <div class="label">Santuario / Comunidad</div>
+                            <div class="value">Calle 15 y Av. 53, La Plata, Buenos Aires</div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Map + donate -->
+            <div class="stack">
+
+                <article class="card map-card">
+                    <header class="card-head map-head">
+                        <h2>Cómo llegar</h2>
+                        <a class="chip" href="https://maps.app.goo.gl/9eVNpxNABAdtra7f8" target="_blank" rel="noopener">
+                            Abrir en Google Maps →
+                        </a>
+                    </header>
+
+                    <div class="map-frame">
+                       <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4033.761076892361!2d-57.95839142339888!3d-34.92381617447522!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95a2e62e9aed23e3%3A0xfe0688aee452566f!2sSantuario%20de%20Schoenstatt!5e1!3m2!1ses!2sar!4v1767638373060!5m2!1ses!2sar" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+                        <!-- Overlay para tapar UI fea del embed y dejar “limpio” -->
+                        <div class="map-scrim" aria-hidden="true"></div>
+
+                        <!-- CTA visible, clickeable -->
+                        <a class="map-cta"
+                           href="https://maps.app.goo.gl/9eVNpxNABAdtra7f8"
+                           target="_blank"
+                           rel="noopener">
+                            <strong>Abrir mapa</strong>
+                            <span class="muted small">Ver ruta y ubicación en Google Maps →</span>
+                        </a>
+                    </div>
+                </article>
+
+                <article class="donate">
+                    <div class="donate-inner">
+                        <div>
+                            <h3>Apoyar la misión</h3>
+                            <p class="muted small">
+                                Si querés ayudar con materiales, traslados o comida, podés colaborar.
+                                Todo suma y se rinde con transparencia.
+                            </p>
+                        </div>
+
+                        <div class="donate-actions">
+                            <a class="btn primary" href="/sumate">Donar</a>
+                            <button class="btn ghost" type="button" @onclick="GoForo">
+                                Ver intenciones →
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </aside>
+
+    </div>
+</section>
+
+@code {
+    private void GoForo() => Nav.NavigateTo("/foro");
+}

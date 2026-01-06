@@ -1,5 +1,3 @@
-
-
 namespace AdsumPater.Core.Entities;
 
 public class FotoMision

@@ -1,0 +1,493 @@
+@page "/foro"
+@rendermode InteractiveServer
+@using AdsumPater.Core.Enums
+@using AdsumPater.Core.Interfaces
+@inject IForoService ForoService
+@implements IDisposable
+
+<PageTitle>Foro - Adsum Pater</PageTitle>
+
+@code {
+    private const string TAB_INT = "intenciones";
+    private const string TAB_REF = "reflexiones";
+}
+
+<section class="page-head">
+    <div class="container-xl head-inner">
+        <div class="kicker">🙏</div>
+
+        <div class="head-text">
+            <h1>Foro o espacio de interacción</h1>
+            <p class="muted">
+                Un lugar para dejar <strong>intenciones</strong> y compartir <strong>reflexiones</strong> de cara a Semana Santa.
+            </p>
+
+            <div class="tabs" role="tablist" aria-label="Foro tabs">
+                <button type="button"
+                        class="tab @(activeTab == TAB_INT ? "active" : "")"
+                        @onclick="() => SetTab(TAB_INT)"
+                        role="tab"
+                        aria-selected="@((activeTab == TAB_INT).ToString().ToLower())">
+                    Intenciones
+                </button>
+
+                <button type="button"
+                        class="tab @(activeTab == TAB_REF ? "active" : "")"
+                        @onclick="() => SetTab(TAB_REF)"
+                        role="tab"
+                        aria-selected="@((activeTab == TAB_REF).ToString().ToLower())">
+                    Reflexiones
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (activeTab == TAB_INT)
+{
+    <section class="hero-ref">
+        <div class="container-xl">
+            <div class="hero-card">
+                <div class="hero-badge">REFLEXIÓN DESTACADA</div>
+                <blockquote class="hero-quote">
+                    “Aquí estoy, Padre, para caminar junto a tu pueblo. Que esta Semana Santa sea un sí concreto:
+                    en la oración, en el servicio y en el encuentro.”
+                </blockquote>
+                <div class="hero-meta">
+                    <span class="hero-author">Equipo Adsum Pater</span>
+                    <span class="dot">•</span>
+                    <span class="hero-date">@DateTime.Now.ToString("MMMM yyyy")</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="wrap">
+        <div class="container-xl grid">
+
+            <div class="left">
+
+                <article class="card">
+                    <header class="card-head">
+                        <h2>Sumar una intención</h2>
+                        <p class="muted small">
+                            Las intenciones pasan por una breve moderación antes de publicarse.
+                        </p>
+                    </header>
+
+                    <div class="form-grid">
+                        <label class="field">
+                            <span>Nombre (opcional)</span>
+                            <input placeholder="Tu nombre" @bind="newNombre" />
+                        </label>
+
+                        <label class="field field-full">
+                            <span>Intención</span>
+                            <textarea rows="4" placeholder="Escribí tu intención…" @bind="newTexto"></textarea>
+                        </label>
+
+                        <div class="form-actions field-full">
+                            <button type="button" class="btn primary" @onclick="CrearIntencion">
+                                Enviar intención
+                            </button>
+
+                            @if (!string.IsNullOrWhiteSpace(formMsg))
+                            {
+                                <span class="hint">@formMsg</span>
+                            }
+                        </div>
+                    </div>
+                </article>
+
+                <div class="note note-light">
+                    <div>
+                        <h3>Un gesto simple</h3>
+                        <p class="muted small">
+                            Si no sabés qué escribir, podés dejar un nombre y una intención corta.
+                            Lo importante es rezar con otros.
+                        </p>
+                    </div>
+                    <div class="note-actions">
+                        <a class="btn ghost" href="/contacto">Contacto</a>
+                        <a class="btn primary" href="/sumate">Sumate</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="right">
+                <article class="card">
+                    <header class="card-head head-row">
+                        <div>
+                            <h2>Intenciones</h2>
+                            <p class="muted small">
+                                Rezamos por vos. Tocá “Rezo por vos” para sumar una oración.
+                            </p>
+                        </div>
+
+                        <div class="search">
+                            <input placeholder="Buscar intención…"
+                                   value="@search"
+                                   @oninput="OnSearchInput" />
+                        </div>
+                    </header>
+
+                    <div class="list">
+                        @if (loadingIntenciones)
+                        {
+                            <div class="empty">Cargando intenciones…</div>
+                        }
+                        else if (IntencionesFiltradas.Count == 0)
+                        {
+                            <div class="empty">
+                                No encontramos intenciones con ese texto.
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var it in PaginaActual)
+                            {
+                                <div class="item">
+                                    <div class="item-top">
+                                        <div class="who">
+                                            <div class="avatar">@GetInitials(it.Nombre)</div>
+                                            <div class="who-text">
+                                                <strong>@(string.IsNullOrWhiteSpace(it.Nombre) ? "Anónimo" : it.Nombre)</strong>
+                                                <span class="muted small">@it.Fecha.ToString("dd/MM/yyyy")</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="count-pill" title="Cantidad de rezos">
+                                            @it.Rezos rezos
+                                        </div>
+                                    </div>
+
+                                    <div class="item-text">@it.Texto</div>
+
+                                    <div class="item-actions">
+                                        <button type="button"
+                                                class="btn primary"
+                                                disabled="@rezoBusyIds.Contains(it.Id)"
+                                                @onclick="() => Rezar(it.Id)">
+                                            @(rezoBusyIds.Contains(it.Id) ? "Rezando..." : "Rezo por vos")
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="pager">
+                                <button type="button" class="btn ghost"
+                                        disabled="@(page == 1)"
+                                        @onclick="Prev">
+                                    ← Anterior
+                                </button>
+
+                                <div class="pages">
+                                    <span class="muted small">Página</span>
+                                    <strong>@(page)</strong>
+                                    <span class="muted small">de</span>
+                                    <strong>@totalPages</strong>
+                                </div>
+
+                                <button type="button" class="btn ghost"
+                                        disabled="@(page == totalPages)"
+                                        @onclick="Next">
+                                    Siguiente →
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </article>
+            </div>
+
+        </div>
+    </section>
+}
+else
+{
+    <section class="wrap">
+        <div class="container-xl">
+
+            <div class="ref-head">
+                <h2>Reflexiones</h2>
+                <p class="muted">
+                    Lecturas, meditaciones y mensajes del equipo para prepararnos para la misión.
+                </p>
+            </div>
+
+            @if (loadingReflexiones)
+            {
+                <div class="empty">Cargando reflexiones…</div>
+            }
+            else
+            {
+                <div class="ref-grid">
+                    @foreach (var r in Reflexiones.OrderByDescending(x => x.Fecha))
+                    {
+                        <article class="ref-card">
+                            <div class="ref-top">
+                                <div class="ref-chip">REFLEXIÓN</div>
+                                <div class="muted small">@r.Fecha.ToString("dd/MM/yyyy")</div>
+                            </div>
+
+                            <h3>@r.Titulo</h3>
+                            <p class="muted">@r.Contenido</p>
+
+                            <div class="ref-foot">
+                                <span class="muted small">— @r.Autor</span>
+                            </div>
+                        </article>
+                    }
+
+                    @if (Reflexiones.Count == 0)
+                    {
+                        <div class="empty">Todavía no hay reflexiones publicadas.</div>
+                    }
+                </div>
+            }
+
+        </div>
+    </section>
+}
+
+@code {
+    // --- UI state
+    private string activeTab = TAB_INT;
+
+    // --- form
+    private string newNombre = "";
+    private string newTexto = "";
+    private string formMsg = "";
+
+    // --- search & paging
+    private string search = "";
+    private int page = 1;
+    private const int PageSize = 10;
+
+    // --- data (DB-backed)
+    private bool loadingIntenciones = true;
+    private bool loadingReflexiones = true;
+
+    private List<IntencionVm> Intenciones = new();
+    private List<ReflexionVm> Reflexiones = new();
+
+    private readonly HashSet<Guid> rezoBusyIds = new();
+
+    // --- TIMER / POLLING CONFIG
+    private PeriodicTimer? timer;
+    private CancellationTokenSource? cts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // 1. Carga inicial normal
+        await RecargarAsync(isBackground: false);
+
+        // 2. Configurar Timer para actualizar cada 5 segundos
+        cts = new CancellationTokenSource();
+        timer = new PeriodicTimer(TimeSpan.FromSeconds(5)); 
+        
+        // 3. Ejecutar el bucle en segundo plano (fire-and-forget)
+        _ = RunTimerAsync();
+    }
+
+    private async Task RunTimerAsync()
+    {
+        try
+        {
+            // Mientras el timer siga activo...
+            while (await timer!.WaitForNextTickAsync(cts!.Token))
+            {
+                // Actualizamos la data en modo "background" (sin spinner de carga)
+                await RecargarAsync(isBackground: true);
+                
+                // Avisamos a la UI que hay cambios para que se redibujen los contadores
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Esto pasa normal cuando cerramos la página, lo ignoramos.
+        }
+    }
+
+    // Método Recargar mejorado: acepta parámetro 'isBackground'
+    private async Task RecargarAsync(bool isBackground)
+    {
+        // Solo mostramos "Cargando..." si es una carga manual o inicial
+        if (!isBackground) 
+        {
+            loadingIntenciones = true;
+            loadingReflexiones = true;
+            formMsg = "";
+            StateHasChanged();
+        }
+
+        try
+        {
+            var ints = await ForoService.ObtenerIntencionesAprobadasAsync(null);
+            Intenciones = ints.Select(x => new IntencionVm
+            {
+                Id = x.Id,
+                Nombre = x.Nombre ?? "",
+                Texto = x.Texto,
+                Fecha = x.Fecha.LocalDateTime,
+                Aprobada = x.Estado,
+                Rezos = x.Rezos
+            }).ToList();
+
+            var refs = await ForoService.ObtenerReflexionesAprobadasAsync();
+            Reflexiones = refs.Select(r => new ReflexionVm
+            {
+                Id = r.Id,
+                Titulo = r.Titulo,
+                Contenido = r.Contenido,
+                Autor = r.Autor,
+                Fecha = r.Fecha.LocalDateTime,
+            }).ToList();
+        }
+        finally
+        {
+            // Quitamos el loading siempre
+            loadingIntenciones = false;
+            loadingReflexiones = false;
+            
+            // Solo reseteamos la página a 1 si fue una recarga manual (cambio de tab o búsqueda)
+            // Si es automática, dejamos al usuario en la página que estaba leyendo.
+            if (!isBackground) 
+            {
+                page = 1;
+            }
+            
+            StateHasChanged();
+        }
+    }
+
+    // Importante: Limpiar el timer al salir para no dejar procesos fantasmas
+    public void Dispose()
+    {
+        cts?.Cancel();
+        cts?.Dispose();
+        timer?.Dispose();
+    }
+
+    // --- Filtros y Helpers ---
+
+    private List<IntencionVm> Aprobadas => 
+        Intenciones.Where(i => i.Aprobada == EstadoPublicacion.Aprobada).ToList();
+
+    private List<IntencionVm> IntencionesFiltradas
+    {
+        get
+        {
+            var q = Aprobadas.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.Trim().ToLowerInvariant();
+                q = q.Where(i =>
+                    (i.Nombre ?? "").ToLowerInvariant().Contains(s) ||
+                    (i.Texto ?? "").ToLowerInvariant().Contains(s));
+            }
+
+            return q.OrderByDescending(i => i.Fecha).ToList();
+        }
+    }
+
+    private int totalPages => Math.Max(1, (int)Math.Ceiling(IntencionesFiltradas.Count / (double)PageSize));
+
+    private List<IntencionVm> PaginaActual =>
+        IntencionesFiltradas.Skip((page - 1) * PageSize).Take(PageSize).ToList();
+
+    private void SetTab(string tab)
+    {
+        activeTab = tab;
+        // Al cambiar de tab, hacemos una carga manual
+        _ = RecargarAsync(isBackground: false);
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        search = e.Value?.ToString() ?? "";
+        page = 1; 
+        // La búsqueda filtra la lista que ya tenemos en memoria, 
+        // no hace falta ir a la DB de nuevo necesariamente, pero si quisieras podrías.
+    }
+
+    private void Prev() { if (page > 1) page--; }
+    private void Next() { if (page < totalPages) page++; }
+
+    private async Task CrearIntencion()
+    {
+        formMsg = "";
+
+        if (string.IsNullOrWhiteSpace(newTexto) || newTexto.Trim().Length < 6)
+        {
+            formMsg = "Escribí una intención un poquito más larga 🙂";
+            return;
+        }
+
+        try
+        {
+            await ForoService.CrearIntencionAsync(newNombre, newTexto);
+
+            newNombre = "";
+            newTexto = "";
+            formMsg = "¡Gracias! Quedó pendiente de moderación.";
+            
+            // Refrescamos la lista manualmente para ver si apareció (aunque esté pendiente)
+            await RecargarAsync(isBackground: false);
+        }
+        catch
+        {
+            formMsg = "No pudimos guardar la intención. Probá de nuevo en un rato.";
+        }
+    }
+
+    private async Task Rezar(Guid id)
+    {
+        if (rezoBusyIds.Contains(id)) return;
+
+        rezoBusyIds.Add(id);
+        try
+        {
+            var ok = await ForoService.SumarRezoAsync(id);
+            if (!ok) return;
+
+            // Actualización optimista local (para que se vea instantáneo)
+            var it = Intenciones.FirstOrDefault(x => x.Id == id);
+            if (it is not null) it.Rezos++;
+        }
+        finally
+        {
+            rezoBusyIds.Remove(id);
+        }
+    }
+
+    private static string GetInitials(string? nombre)
+    {
+        if (string.IsNullOrWhiteSpace(nombre)) return "AP";
+        var parts = nombre.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var first = parts[0][0].ToString().ToUpperInvariant();
+        var second = parts.Length > 1 ? parts[1][0].ToString().ToUpperInvariant() : "";
+        return (first + second).PadRight(2, ' ').Trim();
+    }
+
+    private sealed class IntencionVm
+    {
+        public Guid Id { get; set; }
+        public string Nombre { get; set; } = "";
+        public string Texto { get; set; } = "";
+        public DateTime Fecha { get; set; }
+        public EstadoPublicacion Aprobada { get; set; }
+        public int Rezos { get; set; }
+    }
+
+    private sealed class ReflexionVm
+    {
+        public Guid Id { get; set; }
+        public string Titulo { get; set; } = "";
+        public string Contenido { get; set; } = "";
+        public string Autor { get; set; } = "";
+        public DateTime Fecha { get; set; }
+    }
+}
